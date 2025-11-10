@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AVPPi</title>
+    <link rel="stylesheet" href="/static/css/app.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1 id="appTitle">AVPPi</h1>
+      <nav class="app-nav">
+        <button data-view="player" class="nav-button active" id="navPlayer"></button>
+        <button data-view="settings" class="nav-button" id="navSettings"></button>
+      </nav>
+      <button id="btnQuickLanguage" class="language-toggle"></button>
+    </header>
+
+    <main class="app-main">
+      <section id="view-player" class="view active">
+        <div class="panel">
+          <h2 id="playerNowPlaying"></h2>
+          <p class="status-line">
+            <span id="playerStateLabel"></span>
+            <strong id="playerStateValue">-</strong>
+          </p>
+          <p class="status-line">
+            <span id="playerCurrentLabel"></span>
+            <strong id="playerCurrentValue">-</strong>
+          </p>
+          <div class="controls">
+            <button id="btnPlayPause"></button>
+            <button id="btnPrevious"></button>
+            <button id="btnNext"></button>
+          </div>
+          <div class="volume-control">
+            <label for="volumeSlider" id="volumeLabel"></label>
+            <input type="range" id="volumeSlider" min="0" max="100" />
+            <span id="volumeValue">0%</span>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <h2 id="playlistTitle"></h2>
+            <button id="btnRefreshPlaylist"></button>
+          </div>
+          <ul id="playlist" class="playlist"></ul>
+          <p id="playlistEmpty" class="placeholder hidden"></p>
+        </div>
+      </section>
+
+      <section id="view-settings" class="view">
+        <div class="panel">
+          <h2 id="settingsTitle"></h2>
+          <div class="form-row">
+            <label for="languageSelect" id="languageLabel"></label>
+            <select id="languageSelect">
+              <option value="fr">Français</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label id="localFolderLabel" for="localFolder"></label>
+            <input id="localFolder" type="text" readonly disabled />
+          </div>
+          <div class="form-row">
+            <label id="remoteNameLabel" for="remoteName"></label>
+            <input id="remoteName" type="text" readonly disabled />
+          </div>
+          <div class="form-row">
+            <label id="remotePathLabel" for="remotePath"></label>
+            <input id="remotePath" type="text" readonly disabled />
+          </div>
+          <div class="form-row">
+            <label id="rcloneConfigLabel" for="rcloneConfigPath"></label>
+            <input id="rcloneConfigPath" type="text" readonly disabled />
+          </div>
+          <div class="actions">
+            <button id="btnUpdateVideos"></button>
+            <button id="btnOpenRclone"></button>
+            <button id="btnRestart"></button>
+          </div>
+        </div>
+        <div class="panel">
+          <h2 id="scheduleTitle"></h2>
+          <div class="form-row switch-row">
+            <label for="scheduleEnabled" id="scheduleEnableLabel"></label>
+            <label class="switch">
+              <input type="checkbox" id="scheduleEnabled" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div id="scheduleFields">
+            <div class="form-row">
+              <label for="scheduleStart" id="scheduleStartLabel"></label>
+              <input type="time" id="scheduleStart" />
+            </div>
+            <div class="form-row">
+              <label for="scheduleEnd" id="scheduleEndLabel"></label>
+              <input type="time" id="scheduleEnd" />
+            </div>
+            <div class="form-row">
+              <label id="scheduleDaysLabel"></label>
+              <div class="day-grid" id="scheduleDays">
+                <button type="button" class="day-pill" data-day="0">Mon</button>
+                <button type="button" class="day-pill" data-day="1">Tue</button>
+                <button type="button" class="day-pill" data-day="2">Wed</button>
+                <button type="button" class="day-pill" data-day="3">Thu</button>
+                <button type="button" class="day-pill" data-day="4">Fri</button>
+                <button type="button" class="day-pill" data-day="5">Sat</button>
+                <button type="button" class="day-pill" data-day="6">Sun</button>
+              </div>
+            </div>
+            <p class="form-help" id="scheduleHelp"></p>
+            <div class="actions">
+              <button id="btnSaveSchedule"></button>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <h2 id="syncTitle"></h2>
+          <div class="form-row switch-row">
+            <label for="syncEnabled" id="syncEnableLabel"></label>
+            <label class="switch">
+              <input type="checkbox" id="syncEnabled" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div id="syncFields">
+            <div class="form-row">
+              <label for="syncTime" id="syncTimeLabel"></label>
+              <input type="time" id="syncTime" />
+            </div>
+            <p class="form-help" id="syncHelp"></p>
+            <div class="actions">
+              <button id="btnSaveSync"></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-rclone" class="view">
+        <div class="panel">
+          <h2 id="rcloneTitle"></h2>
+          <div class="form-row">
+            <label for="rcloneToken" id="rcloneTokenLabel"></label>
+            <textarea id="rcloneToken" rows="4"></textarea>
+          </div>
+          <div class="form-row">
+            <label for="rcloneRemotePath" id="rcloneRemotePathLabel"></label>
+            <input id="rcloneRemotePath" type="text" />
+          </div>
+          <div class="form-row">
+            <label for="rcloneRemoteName" id="rcloneRemoteNameLabel"></label>
+            <input id="rcloneRemoteName" type="text" readonly />
+          </div>
+          <div class="form-row">
+            <label for="rcloneLocalFolder" id="rcloneLocalFolderLabel"></label>
+            <input id="rcloneLocalFolder" type="text" readonly />
+          </div>
+          <div class="actions">
+            <button id="btnCreateLink"></button>
+            <button id="btnTestConnection"></button>
+            <button id="btnSyncNow"></button>
+          </div>
+        </div>
+        <div class="panel">
+          <h2 id="rcloneLogsTitle"></h2>
+          <pre id="rcloneLogs" class="log-output"></pre>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast hidden"></div>
+    <script src="/static/js/app.js"></script>
+  </body>
+</html>

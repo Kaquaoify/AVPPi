@@ -1,0 +1,6 @@
+fastapi==0.110.3
+uvicorn[standard]==0.27.1
+python-vlc==3.0.20123
+PyYAML==6.0.1
+pydantic==2.7.4
+typing-extensions>=4.8.0

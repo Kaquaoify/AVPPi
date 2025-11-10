@@ -1,0 +1,19 @@
+# Default AVPPi configuration
+media_directory: ./media
+log_directory: ./logs
+vlc_options:
+  - --quiet
+  - --fullscreen
+  - --no-video-title-show
+  - --video-on-top
+vlc_background_media: color:black
+remote_name: drive
+remote_path: AVPPi-medias
+default_language: fr
+api_host: 0.0.0.0
+api_port: 8000
+rclone_binary: rclone
+rclone_config_path: ~/.config/rclone/rclone.conf
+restart_command: sudo /sbin/reboot
+allow_shutdown_commands: true
+max_playlist_items: 500

@@ -1,0 +1,89 @@
+{
+  "appTitle": "Centre de contrôle AVPPi",
+  "nav": {
+    "player": "Lecteur",
+    "settings": "Paramètres",
+    "rclone": "Rclone"
+  },
+  "player": {
+    "nowPlaying": "Lecture en cours",
+    "volume": "Volume",
+    "playlist": "Liste de lecture",
+    "empty": "Aucune vidéo disponible dans le dossier média.",
+    "stateLabel": "Statut du lecteur",
+    "currentLabel": "Vidéo actuelle",
+    "noVideo": "Aucune",
+    "stateUnknown": "Non initialisé"
+  },
+  "playerStates": {
+    "playing": "Lecture",
+    "paused": "Pause",
+    "stopped": "Arrêt",
+    "unknown": "Non initialisé"
+  },
+  "buttons": {
+    "settings": "Paramètres",
+    "playPause": "Lecture / Pause",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "insert": "Insérer après la vidéo courante",
+    "refresh": "Rafraîchir",
+    "sync": "Mettre à jour les vidéos",
+    "rcloneConfig": "Configuration Rclone",
+    "testConnection": "Tester la connexion",
+    "createLink": "Créer le lien",
+    "apply": "Appliquer",
+    "restart": "Redémarrer la machine",
+    "updateVideos": "Mettre à jour les vidéos",
+    "openRclone": "Ouvrir la config admin",
+    "changeLanguage": "Changer de langue",
+    "saveSchedule": "Enregistrer la programmation",
+    "saveSyncSchedule": "Enregistrer l'heure"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language": "Langue",
+    "localFolder": "Dossier média local",
+    "remoteName": "Nom du remote",
+    "remotePath": "Dossier distant",
+    "rcloneConfig": "Chemin de la configuration Rclone"
+  },
+  "schedule": {
+    "title": "Programmation automatique",
+    "enable": "Activer la programmation",
+    "start": "Heure de début",
+    "end": "Heure de fin",
+    "days": "Jours actifs",
+    "help": "Lorsque la programmation est active, le lecteur bascule automatiquement en lecture ou en pause selon la plage choisie."
+  },
+  "sync": {
+    "title": "Synchronisation quotidienne",
+    "enable": "Activer la synchronisation automatique",
+    "time": "Heure d'exécution",
+    "help": "Lance une synchronisation rclone chaque jour à l'heure indiquée."
+  },
+  "weekdays": {
+    "short": ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
+  },
+  "rclone": {
+    "title": "Configuration Rclone",
+    "tokenLabel": "Jeton d'autorisation",
+    "remoteFolderLabel": "Dossier distant",
+    "localFolderLabel": "Dossier local",
+    "remoteNameLabel": "Nom du remote",
+    "syncButton": "Synchroniser maintenant",
+    "logs": "Journaux"
+  },
+  "dialogs": {
+    "passwordPrompt": "Entrer le mot de passe",
+    "invalidPassword": "Mot de passe incorrect"
+  },
+  "messages": {
+    "commandSent": "Commande envoyée",
+    "syncStarted": "Synchronisation lancée",
+    "syncCompleted": "Synchronisation terminée",
+    "error": "Une erreur est survenue",
+    "scheduleSaved": "Programmation enregistrée",
+    "syncScheduleSaved": "Synchronisation quotidienne enregistrée"
+  }
+}

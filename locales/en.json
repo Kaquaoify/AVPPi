@@ -1,0 +1,89 @@
+{
+  "appTitle": "AVPPi Control Center",
+  "nav": {
+    "player": "Player",
+    "settings": "Settings",
+    "rclone": "Rclone"
+  },
+  "player": {
+    "nowPlaying": "Now Playing",
+    "volume": "Volume",
+    "playlist": "Playlist",
+    "empty": "No videos available in the media folder.",
+    "stateLabel": "Player status",
+    "currentLabel": "Current video",
+    "noVideo": "None",
+    "stateUnknown": "Not initialised"
+  },
+  "playerStates": {
+    "playing": "Playing",
+    "paused": "Paused",
+    "stopped": "Stopped",
+    "unknown": "Not initialised"
+  },
+  "buttons": {
+    "settings": "Settings",
+    "playPause": "Play / Pause",
+    "previous": "Previous",
+    "next": "Next",
+    "insert": "Insert After Current",
+    "refresh": "Refresh",
+    "sync": "Sync Videos",
+    "rcloneConfig": "Rclone Configuration",
+    "testConnection": "Test Connection",
+    "createLink": "Create Link",
+    "apply": "Apply",
+    "restart": "Restart Machine",
+    "updateVideos": "Update Videos",
+    "openRclone": "Open Rclone Config",
+    "changeLanguage": "Change Language",
+    "saveSchedule": "Save Schedule",
+    "saveSyncSchedule": "Save Sync Time"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "localFolder": "Local Media Folder",
+    "remoteName": "Remote Name",
+    "remotePath": "Remote Path",
+    "rcloneConfig": "Rclone Config Path"
+  },
+  "schedule": {
+    "title": "Playback schedule",
+    "enable": "Enable schedule",
+    "start": "Start time",
+    "end": "End time",
+    "days": "Active days",
+    "help": "When enabled, playback automatically starts and stops according to the selected window."
+  },
+  "sync": {
+    "title": "Daily sync",
+    "enable": "Enable automatic sync",
+    "time": "Time of day",
+    "help": "Runs an rclone sync once per day at the selected time."
+  },
+  "weekdays": {
+    "short": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+  },
+  "rclone": {
+    "title": "Rclone Configuration",
+    "tokenLabel": "Authorisation Token",
+    "remoteFolderLabel": "Remote Folder",
+    "localFolderLabel": "Local Folder",
+    "remoteNameLabel": "Remote Name",
+    "syncButton": "Sync Now",
+    "logs": "Logs"
+  },
+  "dialogs": {
+    "passwordPrompt": "Enter password",
+    "invalidPassword": "Incorrect password"
+  },
+  "messages": {
+    "commandSent": "Command sent",
+    "syncStarted": "Synchronisation started",
+    "syncCompleted": "Synchronisation completed",
+    "error": "An error occurred",
+    "scheduleSaved": "Schedule saved",
+    "syncScheduleSaved": "Daily sync updated"
+  }
+}

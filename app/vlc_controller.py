@@ -175,13 +175,16 @@ class VLCController:
                 state=self._derive_state_label(),
             )
 
-    def recover_playback(self) -> None:
+    def recover_playback(self, skip: bool = False) -> None:
         """Attempt to recover when playback appears stuck."""
         with self._media_lock:
-            self._logger.warning("Attempting VLC recovery cycle")
+            self._logger.warning("Attempting VLC recovery cycle%s", " + skip" if skip else "")
             self._player.stop()
             time.sleep(0.5)
-            self._player.play()
+            if skip:
+                self._player.next()
+            else:
+                self._player.play()
 
     def _derive_state_label(self) -> str:
         """Combine multiple libVLC signals to get a user-friendly state."""

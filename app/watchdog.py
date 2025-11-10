@@ -19,12 +19,14 @@ class PlaybackWatchdog:
         poll_interval: int = 10,
         freeze_threshold: int = 30,
         min_progress_ms: int = 500,
+        max_recovery_attempts: int = 2,
     ) -> None:
         self._controller = controller
         self._logger = (logger or logging.getLogger("avppi")).getChild("watchdog")
         self._poll_interval = poll_interval
         self._freeze_threshold = freeze_threshold
         self._min_progress_ms = min_progress_ms
+        self._max_recovery_attempts = max_recovery_attempts
         self._stop = threading.Event()
         self._thread: Optional[threading.Thread] = None
 
@@ -43,6 +45,7 @@ class PlaybackWatchdog:
     def _run(self) -> None:
         previous_snapshot = None
         stalled_duration = 0
+        recovery_attempts = 0
         while not self._stop.wait(self._poll_interval):
             try:
                 snapshot = self._controller.get_snapshot()
@@ -63,14 +66,20 @@ class PlaybackWatchdog:
                 stalled_duration += self._poll_interval
                 if stalled_duration >= self._freeze_threshold:
                     self._logger.warning(
-                        "Playback appears frozen on '%s'; initiating recovery", snapshot.media
+                        "Playback appears frozen on '%s'; initiating recovery (attempt %s/%s)",
+                        snapshot.media,
+                        recovery_attempts + 1,
+                        self._max_recovery_attempts,
                     )
+                    skip = recovery_attempts + 1 >= self._max_recovery_attempts
                     try:
-                        self._controller.recover_playback()
+                        self._controller.recover_playback(skip=skip)
                     except Exception:
                         self._logger.exception("Failed to recover VLC playback")
+                    recovery_attempts = 0 if skip else recovery_attempts + 1
                     stalled_duration = 0
             else:
                 stalled_duration = 0
+                recovery_attempts = 0
 
             previous_snapshot = snapshot

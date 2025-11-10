@@ -13,6 +13,7 @@ from .rclone_manager import RcloneManager, RcloneCommandResult
 from .settings import AppConfig
 from .state_manager import StateManager
 from .scheduler import PlaybackScheduler
+from .sanitizer import MediaSanitizer
 from .sync_scheduler import SyncScheduler
 from .watchdog import PlaybackWatchdog
 from .vlc_controller import VLCController, VLCError
@@ -34,6 +35,7 @@ class ApplicationCore:
         self.scheduler = PlaybackScheduler(self.state, self.vlc, self._logger.getChild("scheduler"))
         self.sync_scheduler = SyncScheduler(self.state, self, self._logger)
         self.watchdog = PlaybackWatchdog(self.vlc, self._logger.getChild("watchdog"))
+        self.sanitizer = MediaSanitizer(config, self._logger.getChild("sanitizer"))
 
     def initialise(self) -> None:
         """Load media and start playback on startup."""
@@ -125,6 +127,16 @@ class ApplicationCore:
     async def update_rclone_config(self, token: str, remote_path: Optional[str]) -> Path:
         async with self._sync_lock:
             return await asyncio.to_thread(self.rclone.update_config, token, remote_path)
+
+    async def sanitize_media(self) -> List[str]:
+        async with self._sync_lock:
+            self._logger.info("Starting media sanitisation")
+            self.vlc.stop()
+            sanitized = await asyncio.to_thread(self.sanitizer.sanitize)
+            media = self.rescan_media()
+            if media:
+                self.vlc.play()
+            return sanitized
 
     def _run_startup_sync(self) -> None:
         async def _task() -> None:

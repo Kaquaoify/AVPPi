@@ -22,6 +22,9 @@ Ce document fournit un aperçu simple de l’organisation interne du projet.
 - **PlaybackWatchdog** (`app/watchdog.py`)  
   Surveille l’avancement de VLC ; si la vidéo reste figée trop longtemps alors qu’elle devrait jouer, il relance le lecteur pour éviter les blocages.
 
+- **MediaSanitizer** (`app/sanitizer.py`)  
+  Analyse les vidéos via ffprobe et, sur demande, les ré-encode avec ffmpeg vers un profil H.264/AAC sûr avant de reconstruire la playlist.
+
 - **Gestion rclone** (`app/rclone_manager.py`)  
   Exécute les commandes rclone (config, test, sync), journalise les sorties et expose les logs récents à l’API.
 

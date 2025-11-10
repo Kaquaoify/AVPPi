@@ -124,6 +124,14 @@ function bindEvents() {
     await runSync();
   });
 
+  document.getElementById("btnSanitize").addEventListener("click", async () => {
+    const confirmed = confirm(t("dialogs.sanitizeConfirm", "Sanitize library now?"));
+    if (!confirmed) {
+      return;
+    }
+    await runSanitize();
+  });
+
   document.getElementById("scheduleEnabled").addEventListener("change", async () => {
     handleScheduleToggle();
     try {
@@ -428,6 +436,23 @@ async function runSync() {
   const result = await runRcloneAction("/api/rclone/sync");
   if (result) {
     await refreshStatus();
+  }
+}
+
+async function runSanitize() {
+  showToast(t("messages.sanitizeStarted", "Sanitising videos"));
+  try {
+    const response = await postJSON("/api/rclone/sanitize");
+    const count = response?.details?.count ?? 0;
+    showToast(
+      count
+        ? t("messages.sanitizeCompletedWithCount", "Sanitisation complete") + ` (${count})`
+        : t("messages.sanitizeCompleted", "Sanitisation complete"),
+    );
+    await refreshStatus();
+  } catch (error) {
+    showToast(error.message, true);
+    throw error;
   }
 }
 

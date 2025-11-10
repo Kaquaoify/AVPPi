@@ -38,7 +38,8 @@
     "openRclone": "Ouvrir la config admin",
     "changeLanguage": "Changer de langue",
     "saveSchedule": "Enregistrer la programmation",
-    "saveSyncSchedule": "Enregistrer l'heure"
+    "saveSyncSchedule": "Enregistrer l'heure",
+    "sanitizeLibrary": "Sanitiser la bibliothèque"
   },
   "settings": {
     "title": "Paramètres",
@@ -76,7 +77,8 @@
   },
   "dialogs": {
     "passwordPrompt": "Entrer le mot de passe",
-    "invalidPassword": "Mot de passe incorrect"
+    "invalidPassword": "Mot de passe incorrect",
+    "sanitizeConfirm": "Sanitiser toutes les vidéos maintenant ? Cela peut prendre plusieurs minutes."
   },
   "messages": {
     "commandSent": "Commande envoyée",
@@ -84,6 +86,9 @@
     "syncCompleted": "Synchronisation terminée",
     "error": "Une erreur est survenue",
     "scheduleSaved": "Programmation enregistrée",
-    "syncScheduleSaved": "Synchronisation quotidienne enregistrée"
+    "syncScheduleSaved": "Synchronisation quotidienne enregistrée",
+    "sanitizeStarted": "Sanitisation lancée",
+    "sanitizeCompleted": "Sanitisation terminée",
+    "sanitizeCompletedWithCount": "Fichiers sanitizés"
   }
 }

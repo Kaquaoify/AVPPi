@@ -53,16 +53,17 @@ class PlaybackWatchdog:
                 self._logger.exception("Failed to obtain VLC snapshot")
                 continue
 
-            if snapshot.state != "playing" or snapshot.position_ms < 0:
-                stalled_duration = 0
-                previous_snapshot = snapshot
-                continue
+            same_media = (
+                previous_snapshot is not None and snapshot.media == previous_snapshot.media and snapshot.media
+            )
+            progressed = (
+                previous_snapshot is not None
+                and snapshot.position_ms >= 0
+                and previous_snapshot.position_ms >= 0
+                and abs(snapshot.position_ms - previous_snapshot.position_ms) >= self._min_progress_ms
+            )
 
-            if (
-                previous_snapshot
-                and snapshot.media == previous_snapshot.media
-                and abs(snapshot.position_ms - previous_snapshot.position_ms) < self._min_progress_ms
-            ):
+            if same_media and not progressed:
                 stalled_duration += self._poll_interval
                 if stalled_duration >= self._freeze_threshold:
                     self._logger.warning(
@@ -82,4 +83,4 @@ class PlaybackWatchdog:
                 stalled_duration = 0
                 recovery_attempts = 0
 
-            previous_snapshot = snapshot
+                previous_snapshot = snapshot

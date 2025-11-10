@@ -10,6 +10,7 @@ AVPPi est une solution open-source qui transforme un poste **Ubuntu Desktop 25.0
 - **Synchronisation quotidienne** : déclenchement automatique d’un `rclone sync` chaque jour à l’heure configurée (06h00 par défaut), avec possibilité de désactiver la fonction.
 - **Synchronisation Drive** : la page rclone permet de coller un token, tester la connexion et lancer une sync manuelle vers le dossier local.
 - **Lecture résiliente** : VLC tourne en décodage logiciel avec un cache élargi et un watchdog interne relance automatiquement le lecteur si une vidéo bloque.
+- **Sanitisation optionnelle** : depuis l’onglet Rclone, un bouton permet de re-encoder automatiquement les vidéos douteuses (ffmpeg) pour garantir une lecture fluide.
 - **Scripts d’installation/mise à jour** : `scripts/install.sh` et `scripts/update.sh` installent les paquets requis, compilent Python 3.12.5, créent la venv, génèrent `/etc/avppi/config.yaml`, configurent Openbox (autologin GDM, fond noir, unclutter, lancement uvicorn) et assurent les bons droits sur `/opt/avppi` et `/var/log/avppi`.
 - **Journaux dédiés** : `app.log`, `playback.log`, `rclone.log` sont créés sous `/var/log/avppi`, plus un `kiosk.log` pour la session Openbox.
 

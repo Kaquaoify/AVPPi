@@ -38,7 +38,8 @@
     "openRclone": "Open Rclone Config",
     "changeLanguage": "Change Language",
     "saveSchedule": "Save Schedule",
-    "saveSyncSchedule": "Save Sync Time"
+    "saveSyncSchedule": "Save Sync Time",
+    "sanitizeLibrary": "Sanitise Library"
   },
   "settings": {
     "title": "Settings",
@@ -76,7 +77,8 @@
   },
   "dialogs": {
     "passwordPrompt": "Enter password",
-    "invalidPassword": "Incorrect password"
+    "invalidPassword": "Incorrect password",
+    "sanitizeConfirm": "Sanitise all videos now? This can take several minutes."
   },
   "messages": {
     "commandSent": "Command sent",
@@ -84,6 +86,9 @@
     "syncCompleted": "Synchronisation completed",
     "error": "An error occurred",
     "scheduleSaved": "Schedule saved",
-    "syncScheduleSaved": "Daily sync updated"
+    "syncScheduleSaved": "Daily sync updated",
+    "sanitizeStarted": "Sanitisation started",
+    "sanitizeCompleted": "Sanitisation completed",
+    "sanitizeCompletedWithCount": "Sanitised files"
   }
 }

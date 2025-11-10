@@ -193,6 +193,17 @@ def create_app(core: ApplicationCore) -> FastAPI:
         path = await core.update_rclone_config(payload.token, payload.remote_path)
         return OperationResponse(success=True, message="Configuration saved", details={"path": str(path)})
 
+    @app.post("/api/rclone/sanitize", response_model=OperationResponse)
+    async def rclone_sanitize() -> OperationResponse:
+        if core.rclone.is_busy():
+            raise HTTPException(status_code=409, detail="Cannot sanitize while rclone job is running")
+        sanitized = await core.sanitize_media()
+        return OperationResponse(
+            success=True,
+            message="Sanitisation completed",
+            details={"processed": sanitized, "count": len(sanitized)},
+        )
+
     @app.get("/api/rclone/logs")
     async def rclone_logs() -> Dict[str, List[str]]:
         return {"logs": core.rclone.get_recent_logs()}

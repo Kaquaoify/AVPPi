@@ -26,7 +26,7 @@ apt-get install -y \
   git vlc rclone \
   xserver-xorg-video-dummy xinit \
   openbox x11-xserver-utils unclutter \
-  unzip curl
+  unzip curl ffmpeg
 
 if ! id -u "${SERVICE_USER}" >/dev/null 2>&1; then
   echo "[2/9] Creating system user ${SERVICE_USER}"

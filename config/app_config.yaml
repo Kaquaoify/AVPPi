@@ -6,7 +6,7 @@ vlc_options:
   - --fullscreen
   - --no-video-title-show
   - --video-on-top
-  - --no-hw-dec
+  - --avcodec-hw=none
   - --file-caching=5000
   - --codec=avcodec
 vlc_background_media: color:black

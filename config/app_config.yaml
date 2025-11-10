@@ -6,6 +6,9 @@ vlc_options:
   - --fullscreen
   - --no-video-title-show
   - --video-on-top
+  - --no-hw-dec
+  - --file-caching=5000
+  - --codec=avcodec
 vlc_background_media: color:black
 remote_name: drive
 remote_path: AVPPi-medias

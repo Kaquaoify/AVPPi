@@ -5,25 +5,28 @@ Ce document fournit un aperçu simple de l’organisation interne du projet.
 ## Composants applicatifs
 
 - **FastAPI** (`app/api.py`, `app/main.py`)  
-  Fournit les routes REST consommées par le frontend : statut du lecteur, liste des médias, commandes VLC, gestion rclone, planification horaire, paramètres généraux.
+  Fournit les routes REST consommées par le frontend : statut du lecteur, liste des médias, commandes VLC, gestion rclone, planification horaire, paramètres généraux.
 
 - **ApplicationCore** (`app/core.py`)  
-  Orchestration centrale : instancie le contrôleur VLC, le gestionnaire rclone, le scanner de médias, le gestionnaire d’état et le scheduler. Au démarrage, charge la playlist, applique le niveau sonore mémorisé et lance la lecture.
+  Orchestration centrale : instancie le contrôleur VLC, le gestionnaire rclone, le scanner de médias, le gestionnaire d’état et les services auxiliaires. Au démarrage, charge la playlist, applique le volume mémorisé et lance la lecture.
 
 - **Contrôleur VLC** (`app/vlc_controller.py`)  
-  Encapsule libVLC : playlist en boucle, play/pause/précédent/suivant, volume, insertion à chaud, conversion d’MRL en noms lisibles.
+  Encapsule libVLC : playlist en boucle, play/pause/précédent/suivant, volume, insertion à chaud, conversion d’URL en noms lisibles.
 
 - **Scheduler** (`app/scheduler.py`)  
   Thread dédié qui vérifie toutes les 30 s si l’heure et le jour courants se trouvent dans la plage active définie via l’interface. Déclenche `play()` ou `pause()` en conséquence.
 
 - **SyncScheduler** (`app/sync_scheduler.py`)  
-  Vérifie les paramètres de synchronisation quotidienne et déclenche un `rclone sync` automatique une fois par jour à l’heure configurée (sauf si un job est déjà en cours).
+  Vérifie les paramètres de synchronisation quotidienne et déclenche un `rclone sync` automatique une fois par jour à l’heure configurée.
+
+- **PlaybackWatchdog** (`app/watchdog.py`)  
+  Surveille l’avancement de VLC ; si la vidéo reste figée trop longtemps alors qu’elle devrait jouer, il relance le lecteur pour éviter les blocages.
 
 - **Gestion rclone** (`app/rclone_manager.py`)  
   Exécute les commandes rclone (config, test, sync), journalise les sorties et expose les logs récents à l’API.
 
 - **État persistant** (`app/state_manager.py`)  
-  Stocke `data/state.json` et les paramètres dynamiques : langue, volume, options rclone, configuration du scheduler.
+  Stocke `data/state.json` et les paramètres dynamiques : langue, volume, options rclone, configuration des schedulers.
 
 - **Frontend** (`app/web/templates`, `app/web/static`)  
   Page unique en HTML/CSS/JS. Le script `app/web/static/js/app.js` charge les locales FR/EN, gère les vues Player/Settings/Rclone, rafraîchit le statut, pilote la playlist et envoie les mises à jour de planification.

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import logging
 import threading
+import time
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional
 from urllib.parse import unquote
@@ -17,6 +19,13 @@ from .state_manager import StateManager
 
 class VLCError(Exception):
     """Base exception for VLC control issues."""
+
+
+@dataclass
+class PlaybackSnapshot:
+    media: str
+    position_ms: int
+    state: str
 
 
 def _build_state_labels() -> Dict[int, str]:
@@ -155,6 +164,24 @@ class VLCController:
             "volume_percent": str(self.get_volume_percent()),
             "current_track": self._mrl_to_display_name(mrl),
         }
+
+    def get_snapshot(self) -> PlaybackSnapshot:
+        with self._media_lock:
+            media = self._media_player.get_media()
+            mrl = media.get_mrl() if media else ""
+            return PlaybackSnapshot(
+                media=self._mrl_to_display_name(mrl),
+                position_ms=max(0, self._media_player.get_time()),
+                state=self._derive_state_label(),
+            )
+
+    def recover_playback(self) -> None:
+        """Attempt to recover when playback appears stuck."""
+        with self._media_lock:
+            self._logger.warning("Attempting VLC recovery cycle")
+            self._player.stop()
+            time.sleep(0.5)
+            self._player.play()
 
     def _derive_state_label(self) -> str:
         """Combine multiple libVLC signals to get a user-friendly state."""

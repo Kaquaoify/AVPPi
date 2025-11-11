@@ -19,9 +19,6 @@ Ce document fournit un aperçu simple de l’organisation interne du projet.
 - **SyncScheduler** (`app/sync_scheduler.py`)  
   Vérifie les paramètres de synchronisation quotidienne et déclenche un `rclone sync` automatique une fois par jour à l’heure configurée.
 
-- **PlaybackWatchdog** (`app/watchdog.py`)  
-  Surveille l’avancement de VLC ; si la vidéo reste figée trop longtemps alors qu’elle devrait jouer, il relance le lecteur pour éviter les blocages.
-
 - **MediaSanitizer** (`app/sanitizer.py`)  
   Analyse les vidéos via ffprobe et, sur demande, les ré-encode avec ffmpeg vers un profil H.264/AAC sûr avant de reconstruire la playlist.
 

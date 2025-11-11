@@ -76,14 +76,9 @@ class VLCController:
         """Replace VLC playlist with items from the media directory."""
         with self._media_lock:
             self._playlist = items
-            self._clear_media_list()
-            if not items:
-                self._logger.info("Playlist is empty; loading fallback background.")
-                self._load_background_clip()
+            self._rebuild_media_list()
+            if not self._playlist:
                 return
-            for path in build_vlc_playlist_args(items):
-                media = self._instance.media_new_path(path)
-                self._media_list.add_media(media)
             self._logger.info("Playlist loaded with %d items", len(items))
             self.play()
 
@@ -119,6 +114,16 @@ class VLCController:
         self._media_list.add_media(background)
         self._current_background = background
         self.play()
+
+    def _rebuild_media_list(self) -> None:
+        self._clear_media_list()
+        if not self._playlist:
+            self._logger.info("Playlist is empty; loading fallback background.")
+            self._load_background_clip()
+            return
+        for path in build_vlc_playlist_args(self._playlist):
+            media = self._instance.media_new_path(path)
+            self._media_list.add_media(media)
 
     # Playback controls -------------------------------------------------
 
@@ -185,6 +190,31 @@ class VLCController:
                 self._player.next()
             else:
                 self._player.play()
+
+    def remove_current_media(self) -> Optional[str]:
+        """Remove the currently playing media from the playlist and rebuild."""
+        with self._media_lock:
+            media = self._media_player.get_media()
+            if not media:
+                return None
+            mrl = media.get_mrl()
+            if not mrl:
+                return None
+            display_name = self._mrl_to_display_name(mrl)
+            target_path = Path(unquote(mrl[7:])) if mrl.startswith("file://") else Path(mrl)
+            before = len(self._playlist)
+            self._playlist = [
+                item for item in self._playlist if Path(item.path).resolve() != target_path.resolve()
+            ]
+            if len(self._playlist) == before:
+                return None
+            self._logger.warning("Removed problematic media '%s' from playlist", display_name)
+            self._rebuild_media_list()
+            if self._playlist:
+                self._player.play()
+            else:
+                self._load_background_clip()
+            return display_name
 
     def _derive_state_label(self) -> str:
         """Combine multiple libVLC signals to get a user-friendly state."""

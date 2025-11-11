@@ -10,23 +10,19 @@ from .vlc_controller import VLCController
 
 
 class PlaybackWatchdog:
-    """Monitor VLC playback and trigger a recovery if it appears stuck."""
+    """Monitor VLC playback and drop files that remain stuck."""
 
     def __init__(
         self,
         controller: VLCController,
         logger: Optional[logging.Logger] = None,
-        poll_interval: int = 10,
-        freeze_threshold: int = 30,
-        min_progress_ms: int = 500,
-        max_recovery_attempts: int = 2,
+        poll_interval: int = 5,
+        freeze_threshold: int = 10,
     ) -> None:
         self._controller = controller
         self._logger = (logger or logging.getLogger("avppi")).getChild("watchdog")
         self._poll_interval = poll_interval
         self._freeze_threshold = freeze_threshold
-        self._min_progress_ms = min_progress_ms
-        self._max_recovery_attempts = max_recovery_attempts
         self._stop = threading.Event()
         self._thread: Optional[threading.Thread] = None
 
@@ -43,44 +39,31 @@ class PlaybackWatchdog:
             self._thread.join(timeout=1)
 
     def _run(self) -> None:
-        previous_snapshot = None
+        last_position: Optional[int] = None
         stalled_duration = 0
-        recovery_attempts = 0
         while not self._stop.wait(self._poll_interval):
             try:
                 snapshot = self._controller.get_snapshot()
-            except Exception:  # pragma: no cover - defensive
+            except Exception:  # pragma: no cover
                 self._logger.exception("Failed to obtain VLC snapshot")
                 continue
 
-            same_media = (
-                previous_snapshot is not None and snapshot.media == previous_snapshot.media and snapshot.media
-            )
-            progressed = (
-                previous_snapshot is not None
-                and snapshot.position_ms >= 0
-                and previous_snapshot.position_ms >= 0
-                and abs(snapshot.position_ms - previous_snapshot.position_ms) >= self._min_progress_ms
-            )
-
-            if same_media and not progressed:
-                stalled_duration += self._poll_interval
-                if stalled_duration >= self._freeze_threshold:
-                    self._logger.warning(
-                        "Playback appears frozen on '%s'; initiating recovery (attempt %s/%s)",
-                        snapshot.media,
-                        recovery_attempts + 1,
-                        self._max_recovery_attempts,
-                    )
-                    skip = recovery_attempts + 1 >= self._max_recovery_attempts
-                    try:
-                        self._controller.recover_playback(skip=skip)
-                    except Exception:
-                        self._logger.exception("Failed to recover VLC playback")
-                    recovery_attempts = 0 if skip else recovery_attempts + 1
-                    stalled_duration = 0
-            else:
+            if snapshot.state != "playing" or snapshot.position_ms < 0:
                 stalled_duration = 0
-                recovery_attempts = 0
+                last_position = snapshot.position_ms
+                continue
 
-                previous_snapshot = snapshot
+            if last_position is None or snapshot.position_ms > last_position:
+                stalled_duration = 0
+            else:
+                stalled_duration += self._poll_interval
+
+            if stalled_duration >= self._freeze_threshold:
+                removed = self._controller.remove_current_media()
+                if removed:
+                    self._logger.warning("Removed frozen media '%s' from playlist", removed)
+                else:
+                    self._logger.warning("Playback frozen but no media could be removed")
+                stalled_duration = 0
+
+            last_position = snapshot.position_ms

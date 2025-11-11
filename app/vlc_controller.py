@@ -215,14 +215,14 @@ class VLCController:
             target_path = Path(unquote(mrl[7:])) if mrl.startswith("file://") else Path(mrl)
             before = len(self._playlist)
             target_str = str(target_path.resolve())
-            self._playlist = [item for item in self._playlist if str(Path(item.path).resolve()) != target_str]
-            if len(self._playlist) == before:
+            new_playlist = [item for item in self._playlist if str(Path(item.path).resolve()) != target_str]
+            if len(new_playlist) == before:
                 return None
             self._logger.warning("Removed problematic media '%s' from playlist", display_name)
-            index = max(self._media_list.index_of_item(media), 0)
-            self._rebuild_media_list()
+            self._playlist = new_playlist
             if self._playlist:
-                self._play_index(min(index, self._media_list.count() - 1))
+                # reload playlist to ensure VLC picks up the updated list
+                self.load_playlist(list(self._playlist))
             else:
                 self._load_background_clip()
             return display_name

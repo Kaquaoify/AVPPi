@@ -74,13 +74,7 @@ class VLCController:
 
     def load_playlist(self, items: List[MediaItem]) -> None:
         """Replace VLC playlist with items from the media directory."""
-        with self._media_lock:
-            self._playlist = items
-            self._rebuild_media_list()
-            if not self._playlist:
-                return
-            self._logger.info("Playlist loaded with %d items", len(items))
-            self.play()
+        self._set_playlist(items, start_index=0)
 
     def insert_after_current(self, item: MediaItem) -> None:
         with self._media_lock:
@@ -219,10 +213,14 @@ class VLCController:
             if len(new_playlist) == before:
                 return None
             self._logger.warning("Removed problematic media '%s' from playlist", display_name)
+            removed_index = next(
+                (i for i, item in enumerate(self._playlist) if str(Path(item.path).resolve()) == target_str),
+                0,
+            )
             self._playlist = new_playlist
             if self._playlist:
-                # reload playlist to ensure VLC picks up the updated list
-                self.load_playlist(list(self._playlist))
+                next_index = removed_index if removed_index < len(self._playlist) else 0
+                self._set_playlist(self._playlist, start_index=next_index)
             else:
                 self._load_background_clip()
             return display_name
@@ -276,3 +274,13 @@ class VLCController:
             except ValueError:
                 return unquote(mrl[7:])
         return unquote(mrl)
+
+    def _set_playlist(self, items: List[MediaItem], start_index: int = 0) -> None:
+        self._player.stop()
+        self._playlist = list(items)
+        self._rebuild_media_list()
+        if self._playlist:
+            self._logger.info("Playlist loaded with %d items", len(self._playlist))
+            self._play_index(min(start_index, len(self._playlist) - 1))
+        else:
+            self._load_background_clip()

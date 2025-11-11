@@ -125,6 +125,17 @@ class VLCController:
             media = self._instance.media_new_path(path)
             self._media_list.add_media(media)
 
+    def _play_index(self, index: int) -> None:
+        self._player.stop()
+        try:
+            media = self._media_list.item_at_index(index)
+        except Exception:
+            media = None
+        if media:
+            self._player.play_item(media)
+        else:
+            self._player.play()
+
     # Playback controls -------------------------------------------------
 
     def play(self) -> None:
@@ -203,15 +214,15 @@ class VLCController:
             display_name = self._mrl_to_display_name(mrl)
             target_path = Path(unquote(mrl[7:])) if mrl.startswith("file://") else Path(mrl)
             before = len(self._playlist)
-            self._playlist = [
-                item for item in self._playlist if Path(item.path).resolve() != target_path.resolve()
-            ]
+            target_str = str(target_path.resolve())
+            self._playlist = [item for item in self._playlist if str(Path(item.path).resolve()) != target_str]
             if len(self._playlist) == before:
                 return None
             self._logger.warning("Removed problematic media '%s' from playlist", display_name)
+            index = max(self._media_list.index_of_item(media), 0)
             self._rebuild_media_list()
             if self._playlist:
-                self._player.play()
+                self._play_index(min(index, self._media_list.count() - 1))
             else:
                 self._load_background_clip()
             return display_name

@@ -46,7 +46,6 @@ class PlaybackWatchdog:
         previous_snapshot = None
         stalled_duration = 0
         recovery_attempts = 0
-        last_media_name = ""
         while not self._stop.wait(self._poll_interval):
             try:
                 snapshot = self._controller.get_snapshot()
@@ -54,14 +53,9 @@ class PlaybackWatchdog:
                 self._logger.exception("Failed to obtain VLC snapshot")
                 continue
 
-            if snapshot.media:
-                last_media_name = snapshot.media
-            current_media = snapshot.media or last_media_name
-            previous_media = (
-                previous_snapshot.media if previous_snapshot and previous_snapshot.media else last_media_name
+            same_media = (
+                previous_snapshot is not None and snapshot.media == previous_snapshot.media and snapshot.media
             )
-
-            same_media = bool(previous_media and current_media and previous_media == current_media)
             progressed = (
                 previous_snapshot is not None
                 and snapshot.position_ms >= 0

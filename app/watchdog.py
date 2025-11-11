@@ -90,5 +90,6 @@ class PlaybackWatchdog:
                 stalled_duration = 0
                 max_position = 0
                 current_media = ""
+                last_position = None
 
             last_position = snapshot.position_ms

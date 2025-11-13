@@ -81,4 +81,8 @@ class PlaybackWatchdog:
         try:
             self._controller.recover_playback()
         except Exception:
-            self._logger.exception("Unable to restart VLC after freeze on '%s'", media)
+            self._logger.exception("Soft recovery failed on '%s'", media)
+        try:
+            self._controller.force_restart()
+        except Exception:
+            self._logger.exception("Unable to rebuild VLC after freeze on '%s'", media)

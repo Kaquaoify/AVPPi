@@ -60,15 +60,38 @@ class VLCController:
         self._config = config
         self._state = state
         self._logger = logging.getLogger("avppi.playback")
-        self._instance = vlc.Instance(config.vlc_options or ["--quiet"])
-        self._media_list = self._instance.media_list_new()
-        self._player = self._instance.media_list_player_new()
-        self._player.set_media_list(self._media_list)
-        self._media_player = self._player.get_media_player()
-        self._player.set_playback_mode(vlc.PlaybackMode.loop)
         self._media_lock = threading.RLock()
+        (
+            self._instance,
+            self._media_list,
+            self._player,
+            self._media_player,
+        ) = self._build_vlc_stack()
         self._playlist: List[MediaItem] = []
         self._current_background: Optional[vlc.Media] = None
+
+    # Internal helpers -------------------------------------------------
+
+    def _build_vlc_stack(self) -> tuple[vlc.Instance, vlc.MediaList, vlc.MediaListPlayer, vlc.MediaPlayer]:
+        """Instantiate libVLC objects for playback."""
+        instance = vlc.Instance(self._config.vlc_options or ["--quiet"])
+        media_list = instance.media_list_new()
+        player = instance.media_list_player_new()
+        player.set_media_list(media_list)
+        media_player = player.get_media_player()
+        player.set_playback_mode(vlc.PlaybackMode.loop)
+        return instance, media_list, player, media_player
+
+    def _release_vlc_stack(self) -> None:
+        """Release libVLC objects, ignoring errors."""
+        for attr in ("_media_player", "_player", "_media_list", "_instance"):
+            obj = getattr(self, attr, None)
+            if obj is None:
+                continue
+            try:
+                obj.release()
+            except Exception:
+                pass
 
     # Playlist handling -------------------------------------------------
 
@@ -195,6 +218,32 @@ class VLCController:
                 self._player.next()
             else:
                 self._player.play()
+
+    def force_restart(self) -> None:
+        """Rebuild the entire VLC stack and resume playback."""
+        with self._media_lock:
+            self._logger.warning("Reinitialising VLC backend")
+            current_index = 0
+            current_media = self._media_player.get_media()
+            if current_media:
+                try:
+                    current_index = max(0, self._media_list.index_of_item(current_media))
+                except Exception:
+                    current_index = 0
+            playlist = list(self._playlist)
+            self._player.stop()
+            self._release_vlc_stack()
+            (
+                self._instance,
+                self._media_list,
+                self._player,
+                self._media_player,
+            ) = self._build_vlc_stack()
+            self._current_background = None
+            if playlist:
+                self._set_playlist(playlist, start_index=min(current_index, len(playlist) - 1))
+            else:
+                self._load_background_clip()
 
     def remove_current_media(self) -> Optional[str]:
         """Remove the currently playing media from the playlist and rebuild."""

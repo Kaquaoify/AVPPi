@@ -16,6 +16,7 @@ from .scheduler import PlaybackScheduler
 from .sanitizer import MediaSanitizer
 from .sync_scheduler import SyncScheduler
 from .vlc_controller import VLCController, VLCError
+from .watchdog import PlaybackWatchdog
 
 
 class ApplicationCore:
@@ -34,6 +35,7 @@ class ApplicationCore:
         self.scheduler = PlaybackScheduler(self.state, self.vlc, self._logger.getChild("scheduler"))
         self.sync_scheduler = SyncScheduler(self.state, self, self._logger)
         self.sanitizer = MediaSanitizer(config, self._logger.getChild("sanitizer"))
+        self.watchdog = PlaybackWatchdog(self.vlc, self._logger.getChild("watchdog"))
 
     def initialise(self) -> None:
         """Load media and start playback on startup."""
@@ -57,6 +59,7 @@ class ApplicationCore:
             self._logger.warning("No media files found in %s", self.config.media_directory)
         self.scheduler.start()
         self.sync_scheduler.start()
+        self.watchdog.start()
         self._run_startup_sync()
 
     @property

@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import threading
 import time
-from typing import Optional
+from typing import Callable, Optional
 
 from .vlc_controller import PlaybackSnapshot, VLCController
 
@@ -20,6 +20,7 @@ class PlaybackWatchdog:
         check_interval: float = 2.0,
         freeze_window: float = 10.0,
         min_progress_ms: int = 750,
+        restart_callback: Optional[Callable[[str], None]] = None,
     ) -> None:
         self._controller = controller
         self._logger = logger
@@ -28,6 +29,8 @@ class PlaybackWatchdog:
         self._min_progress_ms = min_progress_ms
         self._thread: Optional[threading.Thread] = None
         self._stop_event = threading.Event()
+        self._restart_callback = restart_callback
+        self._restart_pending = False
 
     def start(self) -> None:
         if self._thread and self._thread.is_alive():
@@ -57,8 +60,9 @@ class PlaybackWatchdog:
             progressed = self._has_progressed(snapshot, last_snapshot)
             if progressed:
                 last_progress_time = now
+                self._restart_pending = False
             elif now - last_progress_time >= self._freeze_window:
-                self._restart_player(snapshot)
+                self._handle_freeze(snapshot)
                 last_progress_time = now
             last_snapshot = snapshot
 
@@ -75,14 +79,15 @@ class PlaybackWatchdog:
             return True
         return False
 
-    def _restart_player(self, snapshot: PlaybackSnapshot) -> None:
+    def _handle_freeze(self, snapshot: PlaybackSnapshot) -> None:
         media = snapshot.media or "<unknown>"
-        self._logger.warning("Playback frozen on '%s'; restarting VLC", media)
+        if self._restart_pending:
+            return
+        self._restart_pending = True
+        self._logger.warning("Playback frozen on '%s'; restarting application", media)
+        if not self._restart_callback:
+            return
         try:
-            self._controller.recover_playback()
+            self._restart_callback(media)
         except Exception:
-            self._logger.exception("Soft recovery failed on '%s'", media)
-        try:
-            self._controller.force_restart()
-        except Exception:
-            self._logger.exception("Unable to rebuild VLC after freeze on '%s'", media)
+            self._logger.exception("Failed to trigger restart for '%s'", media)

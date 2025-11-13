@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
+import sys
 import threading
+import time
 from pathlib import Path
 from typing import List, Optional
 
@@ -35,7 +38,13 @@ class ApplicationCore:
         self.scheduler = PlaybackScheduler(self.state, self.vlc, self._logger.getChild("scheduler"))
         self.sync_scheduler = SyncScheduler(self.state, self, self._logger)
         self.sanitizer = MediaSanitizer(config, self._logger.getChild("sanitizer"))
-        self.watchdog = PlaybackWatchdog(self.vlc, self._logger.getChild("watchdog"))
+        self.watchdog = PlaybackWatchdog(
+            self.vlc,
+            self._logger.getChild("watchdog"),
+            restart_callback=self.restart_process,
+        )
+        self._restart_lock = threading.Lock()
+        self._restart_scheduled = False
 
     def initialise(self) -> None:
         """Load media and start playback on startup."""
@@ -137,6 +146,33 @@ class ApplicationCore:
             if media:
                 self.vlc.play()
             return sanitized
+
+    def restart_process(self, reason: Optional[str] = None) -> None:
+        """Replace the current uvicorn process with a fresh instance."""
+        with self._restart_lock:
+            if self._restart_scheduled:
+                return
+            self._restart_scheduled = True
+
+        detail = f" due to '{reason}'" if reason else ""
+        self._logger.warning("Restarting AVPPi process%s", detail)
+
+        def _exec_restart() -> None:
+            time.sleep(1.0)
+            python = sys.executable
+            args = [
+                python,
+                "-m",
+                "uvicorn",
+                "app.main:app",
+                "--host",
+                self.config.api_host,
+                "--port",
+                str(self.config.api_port),
+            ]
+            os.execv(python, args)
+
+        threading.Thread(target=_exec_restart, name="avppi-restart", daemon=False).start()
 
     def _run_startup_sync(self) -> None:
         async def _task() -> None:
